@@ -16,9 +16,7 @@
 # --Do all the necessary imports
 import statistics
 import sys
-import random
 
-import boto3 as boto3
 from netCDF4 import Dataset as NetCDFFile
 import json
 from matplotlib.patches import Polygon
@@ -31,8 +29,8 @@ from datetime import timedelta
 
 # from mosquito_util import load_json_from_s3, update_status_on_s3
 
-s3 = boto3.resource(
-    's3')
+# s3 = boto3.resource(
+#     's3')
 
 data_bucket = "mosquito-data"
 test_count = 20
@@ -257,7 +255,7 @@ def load_json(bucket, key):
     key_split = key.split('/')
     download_fn = key_split[len(key_split) - 1]
     file = "/tmp/" + download_fn
-    s3.Bucket(bucket).download_file(key, file)
+    # s3.Bucket(bucket).download_file(key, file)
 
     try:
         with open(file) as f:

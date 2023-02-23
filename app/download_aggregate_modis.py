@@ -9,8 +9,6 @@ import numpy as np
 import pickle
 
 import requests
-import boto3
-import botocore
 
 from numpy import ma
 from netCDF4 import Dataset as NetCDFFile

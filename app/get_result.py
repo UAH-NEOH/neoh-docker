@@ -2,13 +2,13 @@ import string
 import json
 import random
 
-import boto3 as boto3
+# import boto3 as boto3
 # from  mosquito_util import load_json_from_s3
 
 data_bucket = "mosquito-data"
 
-s3 = boto3.resource(
-    's3')
+# s3 = boto3.resource(
+#     's3')
 
 def result_handler(event):
     print(event)

@@ -2,8 +2,7 @@ import string
 import json
 import random
 from datetime import datetime
-from download_imerg import lambda_handler
-from download_aggregate_modis import modis_handler
+
 
 def find_maxmin_latlon(lat, lon, minlat, minlon, maxlat, maxlon):
     if lat > maxlat:
@@ -136,12 +135,7 @@ def start_process(event):
     json_file.close()
 
     # print(dataset)
-    if dataset.lower() == 'precipitation':
-        print("Calling the handler for: "+dataset)
-        lambda_handler(downloadJson)
+    return ({'request_id': request_id, 'dataset': dataset, "json": downloadJson, })
 
-    elif dataset.lower() == 'temperature' or 'vegetation':
-        print("Calling the handler for: " + dataset)
-        modis_handler(downloadJson)
 
-    return ({'request_id': request_id, "json": downloadJson, })
+

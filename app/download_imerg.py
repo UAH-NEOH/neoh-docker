@@ -6,16 +6,16 @@ import urllib3
 import certifi
 import requests
 from time import sleep
-import boto3 as boto3
+# import boto3 as boto3
 from aggregate_imerg import aggregate_handler
 # from mosquito_util import load_json_from_s3, update_status_on_s3
 
 data_bucket = "mosquito-data"
 
-# auth = ('mosquito2019', 'Malafr#1')
+auth = ('mosquito2019', 'Malafr#1')
 
-s3 = boto3.resource(
-    's3')
+# s3 = boto3.resource(
+#     's3')
 
 test_count = 0
 # Create a urllib PoolManager instance to make requests.
@@ -192,7 +192,7 @@ def load_json(bucket, key):
     key_split = key.split('/')
     download_fn = key_split[len(key_split) - 1]
     file = "/tmp/" + download_fn
-    s3.Bucket(bucket).download_file(key, file)
+    # s3.Bucket(bucket).download_file(key, file)
 
     try:
         with open(file) as f:
