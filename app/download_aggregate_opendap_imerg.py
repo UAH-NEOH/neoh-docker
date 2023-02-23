@@ -13,6 +13,8 @@ from matplotlib.patches import Polygon
 
 import matplotlib.path as mpltPath
 from time import sleep
+from pathlib import Path
+
 
 data_bucket = "mosquito-data"
 max_retries = 20
@@ -306,7 +308,10 @@ def imerg_handler(event):
     # use "Late" product
     # product = 'GPM_3IMERGDL_06'
     # varName = 'HQprecipitation'
-
+    Path("/home/neoh-data").mkdir(parents=True, exist_ok=True)
+    Path("/home/neoh-data/status").mkdir(parents=True, exist_ok=True)
+    Path("/home/neoh-data/result").mkdir(parents=True, exist_ok=True)
+    Path("/home/neoh-data/request").mkdir(parents=True, exist_ok=True)
     test_count = 0
     outputJson = {'dataValues': []}
 

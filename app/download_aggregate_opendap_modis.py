@@ -19,6 +19,7 @@ from bs4 import BeautifulSoup
 from matplotlib.patches import Polygon
 import matplotlib.path as mpltPath
 from time import sleep
+from pathlib import Path
 
 data_bucket = "mosquito-data"
 max_retries = 20
@@ -654,6 +655,11 @@ def modis_handler(event):
     # use "Late" product
     # product = 'GPM_3IMERGDL_06'
     # varName = 'HQprecipitation'
+    Path("/home/neoh-data").mkdir(parents=True, exist_ok=True)
+    Path("/home/neoh-data/status").mkdir(parents=True, exist_ok=True)
+    Path("/home/neoh-data/result").mkdir(parents=True, exist_ok=True)
+    Path("/home/neoh-data/request").mkdir(parents=True, exist_ok=True)
+
     print('start')
     print('event')
     print(event)
@@ -745,6 +751,7 @@ def modis_handler(event):
     print('product' + product)
     if "var_name" in input_json:
         varName = input_json['var_name']
+        print(input_json['var_name'])
     print('var_name' + varName)
     dhis_dist_version = 'default'
     if "dhis_dist_version" in input_json:

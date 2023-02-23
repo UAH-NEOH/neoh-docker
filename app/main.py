@@ -90,8 +90,8 @@ async def get_payload(payload: Payload, background_tasks: BackgroundTasks):
         print("Calling the handler for: " + payload_process['dataset'])
         # background_tasks.add_task(modis_handler, payload_process['json'])
         print(payload_process['json']['request_id'])
-        pay = {"dataset": "temperature", "org_unit": "district", "agg_period": "daily", "start_date": "2020-01-01T00:00:00.000Z", "end_date": "2020-01-21T00:00:00.000Z", "data_element_id": "8675309", "request_id": payload_process['json']['request_id'], "min_lat": 6.9176, "max_lat": 10.0004, "min_lon": -13.3035, "max_lon": -10.2658, "creation_time": "02-21-2023T18:58:49Z", "stat_type": "mean", "product": "MOD11B2", "var_name": "LST_Day_6km", "dhis_dist_version": "sierra_leone_1"}
-        modis_handler(pay)
+        # pay = {"dataset": "temperature", "org_unit": "district", "agg_period": "daily", "start_date": "2020-01-01T00:00:00.000Z", "end_date": "2020-01-21T00:00:00.000Z", "data_element_id": "8675309", "request_id": payload_process['json']['request_id'], "min_lat": 6.9176, "max_lat": 10.0004, "min_lon": -13.3035, "max_lon": -10.2658, "creation_time": "02-21-2023T18:58:49Z", "stat_type": "mean", "product": "MOD11B2", "var_name": "LST_Day_6km", "dhis_dist_version": "sierra_leone_1"}
+        modis_handler(payload_process['json'])
 
     return payload_process
 

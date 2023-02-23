@@ -23,11 +23,11 @@ COPY ./requirements.txt /home/requirements.txt
 RUN conda config --add channels conda-forge
 #RUN conda config --set channel_priority strict
 
-RUN conda install -c conda-forge pip  -y
+#RUN conda install -c conda-forge  -y
 RUN conda install -c "conda-forge/label/cf202003" fastapi -y
 RUN conda install --file /home/requirements.txt
 
-RUN pip install -y Pydap
+RUN pip install Pydap
 COPY ./app /home/app/
 
 ENV PYTHONPATH "${PYTHONPATH}:/home/app/"
