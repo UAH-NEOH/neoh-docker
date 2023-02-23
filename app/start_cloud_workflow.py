@@ -1,7 +1,10 @@
+import os
 import string
 import json
 import random
 from datetime import datetime
+
+from neoh_utils import create_dirs
 
 
 def find_maxmin_latlon(lat, lon, minlat, minlon, maxlat, maxlon):
@@ -17,6 +20,7 @@ def find_maxmin_latlon(lat, lon, minlat, minlon, maxlat, maxlon):
 
 
 def start_process(event):
+    create_dirs()
     # print("Event: ", event)
     dataset = event["dataset"]
     org_unit = event['org_unit']
@@ -121,15 +125,22 @@ def start_process(event):
     geometryJson = {"request_id": request_id, "boundaries": districts}
     geometry_pathname = "requests/geometry/"
 
-    with open("/tmp/" + request_id + "_geometry.json", 'w') as geometry_file:
+    mydir = '/home/neoh-data/geometry'
+    myfile = request_id + "_geometry.json"
+    folder_path = os.path.join(mydir, myfile)
+
+    with open(folder_path, 'w') as geometry_file:
         json.dump(geometryJson, geometry_file)
 
     geometry_file.close()
 
 
     # write out download parameter file to S3 bucket to trigger download/aggregation
+    mydir = '/home/neoh-data/request'
+    myfile = request_id + ".json"
+    folder_path = os.path.join(mydir, myfile)
 
-    with open("/tmp/" + request_id + ".json", 'w') as json_file:
+    with open(folder_path, 'w') as json_file:
         json.dump(downloadJson, json_file)
     #        json.dump(districtPrecipStats, json_file)
     json_file.close()

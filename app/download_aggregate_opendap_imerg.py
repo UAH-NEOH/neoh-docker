@@ -1,3 +1,4 @@
+import os
 import sys
 import statistics
 import json
@@ -13,7 +14,7 @@ from matplotlib.patches import Polygon
 
 import matplotlib.path as mpltPath
 from time import sleep
-from pathlib import Path
+
 
 
 data_bucket = "mosquito-data"
@@ -308,10 +309,7 @@ def imerg_handler(event):
     # use "Late" product
     # product = 'GPM_3IMERGDL_06'
     # varName = 'HQprecipitation'
-    Path("/home/neoh-data").mkdir(parents=True, exist_ok=True)
-    Path("/home/neoh-data/status").mkdir(parents=True, exist_ok=True)
-    Path("/home/neoh-data/result").mkdir(parents=True, exist_ok=True)
-    Path("/home/neoh-data/request").mkdir(parents=True, exist_ok=True)
+
     test_count = 0
     outputJson = {'dataValues': []}
 
@@ -335,9 +333,16 @@ def imerg_handler(event):
     creation_time_in = input_json['creation_time']
     date_range_in = start_date.split('T')[0] + " -> " + end_date.split('T')[0]
 
-    with open("/tmp/" + request_id + "_geometry.json", 'r') as json_file:
+    mydir = '/home/neoh-data/geometry'
+    myfile = request_id + "_geometry.json"
+    folder_path = os.path.join(mydir, myfile)
+    with open(folder_path, 'r') as json_file:
         geometryJson = json.load(json_file)
     json_file.close()
+
+    # with open("/home/neoh-data/geometry/" + request_id + "_geometry.json", 'r') as json_file:
+    #     geometryJson = json.load(json_file)
+    # json_file.close()
 
     print(geometryJson)
     if "message" in geometryJson and geometryJson["message"] == "error":
@@ -506,7 +511,7 @@ def imerg_handler(event):
         for record in fileJson:
             outputJson['dataValues'].append(record)
 
-    with open("/tmp/" + request_id + "_result.json", 'w') as result_file:
+    with open("/home/neoh-data/results/" + request_id + "_result.json", 'w') as result_file:
         json.dump(outputJson, result_file)
 
     # s3.Bucket(bucket).upload_file("/tmp/" + request_id + "_result.json", "results/" + request_id + ".json")

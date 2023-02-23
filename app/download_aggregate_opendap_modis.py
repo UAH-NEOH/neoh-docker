@@ -19,7 +19,7 @@ from bs4 import BeautifulSoup
 from matplotlib.patches import Polygon
 import matplotlib.path as mpltPath
 from time import sleep
-from pathlib import Path
+
 
 data_bucket = "mosquito-data"
 max_retries = 20
@@ -143,8 +143,10 @@ def download_opendap(url, filename):
         r1 = s.request('get', url)
         result = s.get(r1.url)
         result.raise_for_status()
-        tmpfn = '/tmp/' + filename
-        f = open(tmpfn, 'wb')
+        mydir = '/home/neoh-data/downloads'
+        myfile = filename
+        folder_path = os.path.join(mydir, myfile)
+        f = open(folder_path, 'wb')
         f.write(result.content)
         f.close()
         print("downloaded url: " + url)
@@ -154,7 +156,7 @@ def download_opendap(url, filename):
         print("Error: failed to download url: " + url)
         sys.exit(1)
 
-    return tmpfn
+    return folder_path
 
 
 def seconds_remaining():
@@ -432,7 +434,10 @@ def process_files(bucket, geometry, dataElement, statType, var_name, opendapUrls
 
         if not tile_map_exists:
             print("saving tile map file " + tile_file)
-            f = open("/tmp/" + tile_file, "wb")
+            mydir = '/home/neoh-data/geometry'
+            myfile = tile_file
+            folder_path = os.path.join(mydir, myfile)
+            f = open(folder_path, "wb")
             pickle.dump(district_i_j_list, f)
             f.close()
             # s3.Bucket(bucket).upload_file("/tmp/" + tile_file, "mod_tile/" + tile_file)
@@ -452,24 +457,6 @@ def process_files(bucket, geometry, dataElement, statType, var_name, opendapUrls
 
     return outputJson
 
-
-def load_json(bucket, key):
-    print("event key " + key)
-    # strip off directory from key for temp file
-    key_split = key.split('/')
-    download_fn = key_split[len(key_split) - 1]
-    file = "/tmp/" + download_fn
-    # s3.Bucket(bucket).download_file(key, file)
-
-    try:
-        with open(file) as f:
-            jsonData = json.load(f)
-        f.close()
-    except IOError:
-        print("Could not read file:" + file)
-        jsonData = {"message": "error"}
-
-    return jsonData
 
 
 def get_tile_hv(lon, lat, data):
@@ -655,10 +642,6 @@ def modis_handler(event):
     # use "Late" product
     # product = 'GPM_3IMERGDL_06'
     # varName = 'HQprecipitation'
-    Path("/home/neoh-data").mkdir(parents=True, exist_ok=True)
-    Path("/home/neoh-data/status").mkdir(parents=True, exist_ok=True)
-    Path("/home/neoh-data/result").mkdir(parents=True, exist_ok=True)
-    Path("/home/neoh-data/request").mkdir(parents=True, exist_ok=True)
 
     print('start')
     print('event')
@@ -718,8 +701,10 @@ def modis_handler(event):
     date_range_in = start_date + " -> " + end_date
 
     # geometryJson = load_json_from_s3(s3.Bucket(bucket), "requests/geometry/" + request_id + "_geometry.json")
-
-    with open("/tmp/" + request_id + "_geometry.json", 'r') as json_file:
+    mydir = '/home/neoh-data/geometry'
+    myfile = request_id + "_geometry.json"
+    folder_path = os.path.join(mydir, myfile)
+    with open(folder_path, 'r') as json_file:
         geometryJson = json.load(json_file)
     json_file.close()
 
@@ -846,7 +831,12 @@ def modis_handler(event):
         for record in jsonRecords:
             outputJson['dataValues'].append(record)
         fileCnt = fileCnt + len(opendap_urls[date])
-    with open("/tmp/" + request_id + "_result.json", 'w') as result_file:
+
+    mydir = '/home/neoh-data/results'
+    myfile = request_id + "_result.json"
+    folder_path = os.path.join(mydir, myfile)
+
+    with open(folder_path, 'w') as result_file:
         json.dump(outputJson, result_file)
     result_file.close()
 
