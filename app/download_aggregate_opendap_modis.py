@@ -20,6 +20,7 @@ from matplotlib.patches import Polygon
 import matplotlib.path as mpltPath
 from time import sleep
 
+from neoh_utils import update_status
 
 data_bucket = "mosquito-data"
 max_retries = 20
@@ -709,10 +710,10 @@ def modis_handler(event):
     json_file.close()
 
     if "message" in geometryJson and geometryJson["message"] == "error":
-        # update_status_on_s3(s3.Bucket(bucket), request_id, "aggregate", "failed",
-        #                     "aggregate_imerge could not load geometry file " +
-        #                     "requests/geometry/" + request_id + "_geometry.json",
-        #                     creation_time=creation_time_in, date_range=date_range_in, dataset=dataset)
+        update_status(request_id, "aggregate", "failed",
+                            "aggregate_imerge could not load geometry file " +
+                            "requests/geometry/" + request_id + "_geometry.json",
+                            creation_time=creation_time_in, date_range=date_range_in, dataset=dataset)
         sys.exit(1)
 
     # defaults
@@ -778,9 +779,9 @@ def modis_handler(event):
 
     # set up opendap urls using filenames from direct access site.  With opendap we can request only the variables
     # we need and we can get corresponding lat/lon as variables and we don't have to deal with sinusoidal projection
-    # update_status_on_s3(s3.Bucket(data_bucket), request_id,
-    #                     "aggregate", "working", "retrieving filenames",
-    #                     creation_time=creation_time_in, date_range=date_range_in, dataset=dataset)
+    update_status( request_id,
+                        "aggregate", "working", "retrieving filenames",
+                        creation_time=creation_time_in, date_range=date_range_in, dataset=dataset)
 
     # start_year = int(start_date[0:4])
     # end_year = int(end_date[0:4])
@@ -792,14 +793,14 @@ def modis_handler(event):
         filenames = get_filenames(listing_url, start_date, end_date, tiles)
     except Exception as e:
         print("Network error: cannot get filename list")
-        # update_status_on_s3(s3.Bucket(data_bucket), request_id, "aggregate", "failed",
-        #                 "OpenDap file list creation failed: ",
-        #                 creation_time=creation_time_in, date_range=date_range_in, dataset=dataset)
+        update_status( request_id, "aggregate", "failed",
+                        "OpenDap file list creation failed: ",
+                        creation_time=creation_time_in, date_range=date_range_in, dataset=dataset)
         sys.exit(-1)
 
-    # update_status_on_s3(s3.Bucket(data_bucket), request_id,
-    #                     "aggregate", "working", "Constructing OpenDAP URLs",
-    #                     creation_time=creation_time_in, date_range=date_range_in, dataset=dataset)
+    update_status( request_id,
+                        "aggregate", "working", "Constructing OpenDAP URLs",
+                        creation_time=creation_time_in, date_range=date_range_in, dataset=dataset)
     # opendap_urls = get_opendap_urls(var_name,x_start_stride_stop, y_start_stride_stop, filenames)
     opendap_urls = get_opendap_urls(var_name, '', '', filenames)
 
@@ -811,9 +812,9 @@ def modis_handler(event):
     numDates = len(opendap_urls.keys())
     fileCnt = 1
     for date in opendap_urls.keys():
-        # update_status_on_s3(s3.Bucket(data_bucket), request_id,
-        #                     "aggregate", "working", "Aggregating file " + str(fileCnt) + " of " + str(numFiles),
-        #                     creation_time=creation_time_in, date_range=date_range_in, dataset=dataset)
+        update_status( request_id,
+                            "aggregate", "working", "Aggregating file " + str(fileCnt) + " of " + str(numFiles),
+                            creation_time=creation_time_in, date_range=date_range_in, dataset=dataset)
         bucket = 'text'
         try:
             jsonRecords = process_files(bucket, geometryJson, data_element_id, statType, var_name,
@@ -822,12 +823,12 @@ def modis_handler(event):
             print("Successfully processed  files for date ", date)
         except Exception as e:
             print("returning exception ", e)
-            print("Error reading files for date ", date, " exiting...")
+            print("Error reading files for date ", date)
             # continue
-            # update_status_on_s3(s3.Bucket(data_bucket), request_id, "download", "failed",
-            #                     "Error reading files for date" + date,
-            #                     creation_time=creation_time_in, date_range=date_range_in, dataset=dataset)
-            exit(-1)
+            update_status( request_id, "download", "failed",
+                                "Error reading files for date" + date,
+                                creation_time=creation_time_in, date_range=date_range_in, dataset=dataset)
+            continue
         for record in jsonRecords:
             outputJson['dataValues'].append(record)
         fileCnt = fileCnt + len(opendap_urls[date])
@@ -842,9 +843,9 @@ def modis_handler(event):
 
     # s3.Bucket(bucket).upload_file("/tmp/" + request_id + "_result.json", "results/" + request_id + ".json")
 
-    # update_status_on_s3(s3.Bucket(data_bucket), request_id, "aggregate", "success",
-    #                     "All requested files successfully aggregated", creation_time=creation_time_in,
-    #                     date_range=date_range_in, dataset=dataset)
+    update_status(request_id, "aggregate", "success",
+                        "All requested files successfully aggregated", creation_time=creation_time_in,
+                        date_range=date_range_in, dataset=dataset)
 
 # if __name__ == '__main__':
 #    main()
