@@ -18,12 +18,9 @@ RUN wget \
 #
 COPY ./requirements.txt /home/requirements.txt
 
-#RUN conda install --file /home/requirements.txt netCDF4 fastapi uvicorn pydantic
 
 RUN conda config --add channels conda-forge
-#RUN conda config --set channel_priority strict
 
-#RUN conda install -c conda-forge  -y
 RUN conda install -c "conda-forge/label/cf202003" fastapi -y
 RUN conda install --file /home/requirements.txt
 

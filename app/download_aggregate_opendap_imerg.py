@@ -15,6 +15,8 @@ from matplotlib.patches import Polygon
 import matplotlib.path as mpltPath
 from time import sleep
 import logging
+
+import config
 from neoh_utils import update_status
 
 data_bucket = "mosquito-data"
@@ -356,9 +358,7 @@ def imerg_handler(event):
         sys.exit(1)
     districts = geometryJson["boundaries"]
 
-    # eventually make into env variables
-    auth_name = 'mosquito2019'
-    auth_pw = 'Malafr#1'
+
     base_url = 'https://gpm1.gesdisc.eosdis.nasa.gov/opendap/hyrax/GPM_L3/'
 
     listing_url = base_url + product
@@ -445,7 +445,7 @@ def imerg_handler(event):
         dateStr = file.split('/')[-1].split('-')[1].split('.')[4]
         fileJson = []
         try:
-            session = setup_session(username=auth_name, password=auth_pw, check_url=url)
+            session = setup_session(username=config.Earthdata_username, password=config.Earthdata_password, check_url=url)
             dataset = open_url(url, session=session)
             # extract date from filename
             # https://gpm1.gesdisc.eosdis.nasa.gov/opendap/hyrax/GPM_L3/GPM_3IMERGDF.06/2021/09/3B-DAY.MS.MRG.3IMERG.20210901-S000000-E235959.V06.nc4

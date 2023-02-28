@@ -22,7 +22,7 @@ import matplotlib.path as mpltPath
 from time import sleep
 
 from neoh_utils import update_status
-
+import config
 data_bucket = "mosquito-data"
 max_retries = 20
 sleep_secs = 5
@@ -31,9 +31,9 @@ return_missing_values = False
 
 lambda_context = None
 
-auth = ('mosquito2019', 'Malafr#1')
-
-
+auth = (config.Earthdata_username, config.Earthdata_password)
+print(config.Earthdata_username)
+print(config.Earthdata_password)
 
 def accumVariableByDistrict(polylist, variable, mask, lat, lon, districtVariable,
                             minlat, minlon, maxlat, maxlon, valid_min, valid_max, district_i_j_list):
@@ -282,7 +282,6 @@ def process_files(bucket, geometry, dataElement, statType, var_name, opendapUrls
             break
 
 
-
         # auto scale doesn't seem to work on temp data, so set to false and manually scale
         print("reading variables...")
 
@@ -293,19 +292,13 @@ def process_files(bucket, geometry, dataElement, statType, var_name, opendapUrls
                 nc.set_auto_scale(False)
                 print("reading variable...")
                 variable = get_variable(nc, var_name, x_start_stride_stop, y_start_stride_stop)
-                # if variable is None:
-                #     print("Network error reading variable "+var_name)
-                #     raise Exception("Network error reading variable "+var_name)
-                # print("variable.data:  " + var_name + " ", variable.data)
+
                 mask = ma.getmask(variable)
                 print("reading attributes...")
                 scale_factor = getattr(nc.variables[var_name], 'scale_factor')
-                # print("scale_factor", scale_factor)
                 add_offset = getattr(nc.variables[var_name], 'add_offset')
-                # print("add_offset", add_offset)
-                # modis_var = ma.getdata(variable)
                 modis_var = ma.getdata(variable) * scale_factor + add_offset
-                # print("scaled variable:  " + var_name + " ", modis_var)
+
                 valid_range = getattr(nc.variables[var_name], 'valid_range')
                 print("variable ", var_name, "valid_range", valid_range)
                 valid_min = float(valid_range[0]) * scale_factor + add_offset
@@ -319,14 +312,10 @@ def process_files(bucket, geometry, dataElement, statType, var_name, opendapUrls
 
                 print("reading lat...")
                 lat = get_variable(nc, 'Latitude', x_start_stride_stop, y_start_stride_stop)
-                # if lat is None:
-                #     print("Network error reading Latitude")
-                #     raise Exception("Network error reading Latitude ")
+
                 print("reading lon...")
                 lon = get_variable(nc, 'Longitude', x_start_stride_stop, y_start_stride_stop)
-                # if lon is None:
-                #     print("Network error reading Longitude")
-                #     raise Exception("Network error reading Longitude ")
+
             except Exception as e:
                 print("Exception ", e)
                 logging.info('Network error reading data {}'.format(e))
@@ -342,7 +331,6 @@ def process_files(bucket, geometry, dataElement, statType, var_name, opendapUrls
             break
 
         # need to get masked values, and scale using attribute scale_factor
-        # print("mask:  " + var_name + " ", mask)
 
         # strip out yyyyddd from opendap url
         tempStr = os.path.basename(opendapUrl).split('.')[1]
@@ -360,7 +348,7 @@ def process_files(bucket, geometry, dataElement, statType, var_name, opendapUrls
 
         # require a minimum of 60 secs to finish processing a MODIS file
         if seconds_remaining() < 30:
-            raise Exception("Less than 30 seconds remaining in lambda fn")
+            raise Exception("Less than 30 seconds remaining in  fn")
 
         for district in districts:
             if tile_map_exists:
@@ -402,14 +390,10 @@ def process_files(bucket, geometry, dataElement, statType, var_name, opendapUrls
                     print(
                     "Skipping", dist_id, \
                     "because of unknown type", shape["type"])
-                # compute statisics
-                #        accumVariableByDistrict(distPoly, variable, lat, lon, districtVariable,minlat,minlon,maxlat,maxlon,im)
                 accumVariableByDistrict(distPoly, modis_var, mask, lat, lon,
                                         districtVariable, minlat, minlon, maxlat, maxlon,
                                         valid_min, valid_max, district_i_j_list)
-                # districtPolygons[dist_id] = distPoly
 
-        #    print("finished file " + key)
         nc.close()
 
         if not tile_map_exists:
