@@ -5,7 +5,7 @@ import random
 from datetime import datetime
 
 from neoh_utils import create_dirs
-
+import logging
 
 def find_maxmin_latlon(lat, lon, minlat, minlon, maxlat, maxlon):
     if lat > maxlat:
@@ -21,6 +21,8 @@ def find_maxmin_latlon(lat, lon, minlat, minlon, maxlat, maxlon):
 
 def start_process(event):
     create_dirs()
+
+
     # print("Event: ", event)
     dataset = event["dataset"]
     org_unit = event['org_unit']
@@ -36,6 +38,13 @@ def start_process(event):
     statType = 'none'
     product = 'none'
     var_name = 'none'
+
+    mydir = '/home/neoh-data/logs'
+    myfile = "neoh-data.log"
+    folder_path = os.path.join(mydir, myfile)
+    logging.basicConfig(filename=folder_path, level=logging.INFO)
+    logging.info('Creating logs for' + request_id)
+
     # "stat_type":"mean", "product": "GPM_3IMERGDL_06", "var_name": "HQprecipitation"
     if "stat_type" in event:
         statType = event['stat_type']
@@ -73,14 +82,14 @@ def start_process(event):
                         minlat, minlon, maxlat, maxlon = find_maxmin_latlon(coord[1], coord[0], minlat, minlon,
                                                                             maxlat, maxlon)
         else:
-            print
+            logging.info(
             "Skipping", dist_name, \
-            "because of unknown type", shape["type"]
+            "because of unknown type", shape["type"])
 
     # datetime object containing current date and time
     now = datetime.now()
     date_st = now.strftime("%m-%d-%YT%H:%M:%SZ")
-    print("process started: " + date_st)
+    logging.info("process started: " + date_st)
 
     # format new json structure
     downloadJson = {"dataset": dataset, "org_unit": org_unit, "agg_period": period, "start_date": start_date,
@@ -145,6 +154,7 @@ def start_process(event):
     #        json.dump(districtPrecipStats, json_file)
     json_file.close()
 
+    logging.info("End of start process, moving to data request ")
     # print(dataset)
     return ({'request_id': request_id, 'dataset': dataset, "json": downloadJson, })
 

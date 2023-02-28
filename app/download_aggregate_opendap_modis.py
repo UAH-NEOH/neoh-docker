@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 import statistics
@@ -36,6 +37,7 @@ auth = ('mosquito2019', 'Malafr#1')
 
 def accumVariableByDistrict(polylist, variable, mask, lat, lon, districtVariable,
                             minlat, minlon, maxlat, maxlon, valid_min, valid_max, district_i_j_list):
+    # logging.info('inside accumVariableByDistrict function ')
     for poly in polylist:
         if poly.get_label() not in districtVariable.keys():
             districtVariable[poly.get_label()] = []
@@ -81,6 +83,7 @@ def accumVariableByDistrict(polylist, variable, mask, lat, lon, districtVariable
 
 def accumVariableByDictionary(variable, districtVariable, district_i_j_list,
                               valid_min, valid_max):
+    logging.info('accumVariableByDictionary ')
     for district, coords in district_i_j_list.items():
         if district not in districtVariable:
             districtVariable[district] = []
@@ -93,6 +96,7 @@ def accumVariableByDictionary(variable, districtVariable, district_i_j_list,
 
 
 def calcDistrictStats(districtVariable):
+    # logging.info('inside calcDistrictStats function ')
     districtVariableStats = {}
     for dist in districtVariable.keys():
         if dist not in districtVariableStats.keys():
@@ -153,7 +157,9 @@ def download_opendap(url, filename):
         print("downloaded url: " + url)
 
     except Exception as e:
+
         print('Exception ', e)
+        logging.info('failed to download url: {}'.format(e))
         print("Error: failed to download url: " + url)
         sys.exit(1)
 
@@ -173,6 +179,7 @@ def timeout_is_near():
 
 
 def get_variable(nc, var_name, x_start_stride_stop, y_start_stride_stop):
+    logging.info('Inside get_variable function')
     x_start = 0
     x_stride = 0
     x_stop = 0
@@ -202,9 +209,11 @@ def get_variable(nc, var_name, x_start_stride_stop, y_start_stride_stop):
                 variable = nc.variables[var_name][:]
             success = True
             print("Successfully read ", var_name)
+
             break
         except Exception as e:
             print("Exception ", e)
+            logging.info('Network error reading variable {}'.format(e))
             print("Network error reading variable ", var_name)
             retry = retry + 1
             print("retry ", retry, " of ", max_retries, "...")
@@ -222,12 +231,9 @@ def process_files(bucket, geometry, dataElement, statType, var_name, opendapUrls
                   x_start_stride_stop, y_start_stride_stop, dhis_dist_version):
     # dictionaries for computing stats by district
     districtVariable = {}
-    # districtVariableStats = {}
-    # districtPolygons = {}
 
-    # subset_str = '_'+x_start_stride_stop.replace('[','').replace(']','').replace(':','_').strip()+'_'+\
-    #              y_start_stride_stop.replace('[','').replace(']','').replace(':','_').strip()
-    # print('subset_str ',subset_str)
+    # logging.info('inside process_files function')
+
     districts = geometry["boundaries"]
     dateStr = ""
     # all urls are for the same date
@@ -247,25 +253,6 @@ def process_files(bucket, geometry, dataElement, statType, var_name, opendapUrls
         tile_map_exists = False
         # check for existence of tile file
         print("checking for tile file...")
-        # try:
-        #     s3.Bucket(bucket).download_file("mod_tile/" + tile_file, "/tmp/" + tile_file)
-        # except botocore.exceptions.ClientError as e:
-        #     if e.response['Error']['Code'] == "404":
-        #         # The object does not exist.
-        #         tile_map_exists = False
-        #         print("tile map file " + tile_file + " doesn't exist, creating...")
-        #     else:
-        #         # Something else has gone wrong.
-        #         print("error reading tile map file")
-        #         print("error: ", e)
-        #         raise Exception("error reading tile map file") from e
-        # else:
-        #     # The object does exist, read it into numpy dictionary and set flag
-        #     print("loading tile map file " + tile_file)
-        #     tile_map_exists = True
-        #     f = open("/tmp/" + tile_file, "rb")
-        #     district_i_j_list = pickle.load(f)
-        #     f.close()
 
         print("opening url ", opendapUrl)
         # netcdf_file = download_opendap(opendapUrl, str(opendapUrl).split('?')[0].split('/')[-1])
@@ -282,6 +269,7 @@ def process_files(bucket, geometry, dataElement, statType, var_name, opendapUrls
                 break
             except Exception as e:
                 print("Exception ", e)
+                logging.info('Network error opening url {}'.format(e))
                 print("Network error opening url ", netcdf_file)
                 retry = retry + 1
                 print("retry ", retry, " of ", max_retries, "...")
@@ -293,17 +281,7 @@ def process_files(bucket, geometry, dataElement, statType, var_name, opendapUrls
                     raise Exception("Network error opening url, maximum retries exceeded") from e
             break
 
-        # tries = 3
-        # for i in range(max_retries):
-        #     try:
-        #         nc = NetCDFFile(opendapUrl)
-        #         print("Successfully opened url ", opendapUrl)
-        #     except Exception as e:
-        #         if i < tries - 1:  # i is zero indexed
-        #             continue
-        #         else:
-        #             raise
-        #     break
+
 
         # auto scale doesn't seem to work on temp data, so set to false and manually scale
         print("reading variables...")
@@ -351,6 +329,7 @@ def process_files(bucket, geometry, dataElement, statType, var_name, opendapUrls
                 #     raise Exception("Network error reading Longitude ")
             except Exception as e:
                 print("Exception ", e)
+                logging.info('Network error reading data {}'.format(e))
                 print("Network error reading data ", netcdf_file)
                 retry = retry + 1
                 print("retry ", retry, " of ", max_retries, "...")
@@ -420,9 +399,9 @@ def process_files(bucket, geometry, dataElement, statType, var_name, opendapUrls
                                 minlat, minlon, maxlat, maxlon = find_maxmin_latlon(coord[1], coord[0], minlat, minlon,
                                                                                     maxlat, maxlon)
                 else:
-                    print
+                    print(
                     "Skipping", dist_id, \
-                    "because of unknown type", shape["type"]
+                    "because of unknown type", shape["type"])
                 # compute statisics
                 #        accumVariableByDistrict(distPoly, variable, lat, lon, districtVariable,minlat,minlon,maxlat,maxlon,im)
                 accumVariableByDistrict(distPoly, modis_var, mask, lat, lon,
@@ -471,6 +450,7 @@ def get_tile_hv(lon, lat, data):
     vert = data[i - 1, 0]
     horiz = data[i - 1, 1]
     print('Horizontal Tile: ', horiz, ' Vertical Tile: ', vert)
+    logging.info('Calculated the Horizontal Tile and Vertical Tile')
     return int(horiz), int(vert)
 
 
@@ -483,6 +463,7 @@ def is_valid(url):
 
 
 def get_href(url, substr):
+    # logging.info('inside get_href function')
     # all URLs of `url`
     contents = []
     # domain name of the URL without the protocol
@@ -571,6 +552,7 @@ def get_filenames(url, start_date, end_date, tiles):
         dates = get_dates(url, start_year, end_year)
     except Exception as e:
         print("Error in url: " + url)
+        logging.info('cannot find filenames {}'.format(e))
         print("cannot find filenames for " + start_year + " - " + end_year)
         raise e
 
@@ -622,6 +604,7 @@ def get_opendap_urls(var_name, x_start_stride_stop, y_start_stride_stop, filenam
     # construct opendap url from info in MODIS filenames
     # extract year, jday from filename
     # opendap_urls=[]
+    # logging.info('inside get_opendap_urls function')
     opendap_urls = {}
     for date in filenames.keys():
         if date not in opendap_urls:
@@ -657,6 +640,13 @@ def modis_handler(event):
     request_id = input_json["request_id"]
     print("request_id ", request_id)
 
+    mydir = '/home/neoh-data/logs'
+    myfile = request_id + ".log"
+    folder_path = os.path.join(mydir, myfile)
+    logging.basicConfig(filename=folder_path, level=logging.INFO)
+    logging.info('Started logging from MODIS Handler' + request_id)
+    logging.info(event)
+
     start_date = input_json['start_date'].split('T')[0]
     end_date = input_json['end_date'].split('T')[0]
     # begTime = '2015-08-01T00:00:00.000Z'
@@ -671,11 +661,11 @@ def modis_handler(event):
     # first seven rows contain header information
     # bottom 3 rows are not data
     # https://modis-land.gsfc.nasa.gov/pdf/sn_bound_10deg.txt
-    print('critical')
+    # print('critical')
     data = np.genfromtxt('./app/sn_bound_10deg.txt',
                          skip_header=7,
                          skip_footer=3)
-    print('checking sn_bound file')
+    logging.info('checking sn_bound file')
     print(data)
     if 'hv_tilelist' in input_json:
         tiles = input_json['hv_tilelist']  # i.e. [(20,11),(20,10)]  modis h,v sinusoidal tile indices
@@ -743,7 +733,7 @@ def modis_handler(event):
     if "dhis_dist_version" in input_json:
         dhis_dist_version = input_json['dhis_dist_version']
     print('dhis_dist_version ' + dhis_dist_version)
-
+    logging.info('Checked all the variables')
     data_element_id = input_json['data_element_id']
 
     #        modis_version_string = '{:03d}'.format(modis_version)
@@ -771,12 +761,12 @@ def modis_handler(event):
     if "[" in y_start_stride_stop and "]" in y_start_stride_stop:
         add_string = add_string + "_" + y_start_stride_stop[1:len(y_start_stride_stop) - 1].replace(':', '_', 2)
     print("add_string " + add_string)
-
+    logging.info('Checking boundaries')
     # https://ladsweb.modaps.eosdis.nasa.gov/opendap/hyrax/allData/6/MOD11B2/2018/
     #        listing_url = 'https://' + listing_site + '/' + sat_dir + '/' + product + '.' + modis_version_string + '/'
     listing_url = 'https://' + opendap_site + '/' + opendap_path + '/' + modis_version_string + '/' + product + '/'
     print("listing_url: " + listing_url)
-
+    logging.info('Checking URLS')
     # set up opendap urls using filenames from direct access site.  With opendap we can request only the variables
     # we need and we can get corresponding lat/lon as variables and we don't have to deal with sinusoidal projection
     update_status( request_id,
@@ -792,7 +782,7 @@ def modis_handler(event):
     try:
         filenames = get_filenames(listing_url, start_date, end_date, tiles)
     except Exception as e:
-        print("Network error: cannot get filename list")
+        logging.info("Network error: cannot get filename list")
         update_status( request_id, "aggregate", "failed",
                         "OpenDap file list creation failed: ",
                         creation_time=creation_time_in, date_range=date_range_in, dataset=dataset)
@@ -805,6 +795,7 @@ def modis_handler(event):
     opendap_urls = get_opendap_urls(var_name, '', '', filenames)
 
     print("opendap_urls: ", opendap_urls)
+    logging.info('Listing OPENDAP URLs')
     # use netcdf to directly access the opendap URLS and return the variables we want
     numFiles = 0
     for date in opendap_urls.keys():
@@ -812,6 +803,7 @@ def modis_handler(event):
     numDates = len(opendap_urls.keys())
     fileCnt = 1
     for date in opendap_urls.keys():
+        logging.info('Aggregating files')
         update_status( request_id,
                             "aggregate", "working", "Aggregating file " + str(fileCnt) + " of " + str(numFiles),
                             creation_time=creation_time_in, date_range=date_range_in, dataset=dataset)
@@ -822,6 +814,7 @@ def modis_handler(event):
                                         dhis_dist_version + add_string)
             print("Successfully processed  files for date ", date)
         except Exception as e:
+            logging.info('Error reading files {}'.format(e))
             print("returning exception ", e)
             print("Error reading files for date ", date)
             # continue

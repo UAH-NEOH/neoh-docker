@@ -14,7 +14,7 @@ from matplotlib.patches import Polygon
 
 import matplotlib.path as mpltPath
 from time import sleep
-
+import logging
 from neoh_utils import update_status
 
 data_bucket = "mosquito-data"
@@ -43,9 +43,9 @@ def get_href(url, substr):
     # check for status
     retry = 0
     while req.status_code != 200:  # Not "ok"
-        print("error code: ", req.status_code)
-        print("get_href error in requests.get(), retrying...")
-        print("retry ", retry + 1, " of ", max_retries, "...")
+        logging.info("error code: {}" .format(req.status_code))
+        logging.info("get_href error in requests.get(), retrying...")
+        # logging.info("retry ", retry + 1, " of ", max_retries, "...")
         # if retry < max_retries and not timeout_is_near():
         if retry < max_retries:
             req = requests.get(url)
@@ -55,10 +55,10 @@ def get_href(url, substr):
                 sleep(sleep_secs)
                 retry = retry + 1
         else:
-            print("exceeded maximum retries, retries: ", retry)
-            print("Error: get_href network error at " + url)
+            logging.info("exceeded maximum retries ")
+            logging.info("Error: get_href network error at {}".format( url))
             raise Exception("Error: get_href network error at " + url)
-    print("parsing url: " + url)
+    logging.info("parsing url: {}".format( url))
     # print(req.content)
     soup = BeautifulSoup(req.content, "html.parser")
 
@@ -155,7 +155,7 @@ def get_filenames(url, start_date, end_date):
             while month <= stop_month:
                 # create url to get listing month by month
                 listing_url = url + '/' + '{:04d}/{:02d}/'.format(year, month)
-                print(listing_url)
+                logging.info(listing_url)
                 # get listing of files
                 listing = get_href(listing_url, "")
                 for fname in listing:
@@ -175,15 +175,15 @@ def get_filenames(url, start_date, end_date):
                             files.append(fname.split('.html')[0])
                             found_dates[date_str] = True
                 month = month + 1
-                print(files)
+                logging.info(files)
 
             # increment month
             year = year + 1
 
         # dates = get_dates(url, start_year, end_year)
     except Exception as e:
-        print("Error in url: " + url)
-        print("cannot find filenames for " + start_year + " - " + end_year)
+        logging.info("Error in url: " + url)
+        # logging.info("cannot find filenames for " + start_year + " - " + end_year)
         raise e
 
     return files
@@ -296,7 +296,7 @@ def find_poly_box(district, minlat, minlon, maxlat, maxlon):
                     minlat, minlon, maxlat, maxlon = find_maxmin_latlon(coord[1], coord[0], minlat, minlon,
                                                                         maxlat, maxlon)
     else:
-        print("Skipping ", dist_name, " because of unknown type ", shape["type"])
+        logging.info("Skipping because of unknown type ")
 
     return distPoly, minlat, minlon, maxlat, maxlon
 
@@ -316,8 +316,14 @@ def imerg_handler(event):
 
     input_dataset = input_json["dataset"]
     request_id = input_json["request_id"]
-    print("request_id ", request_id)
+    # print("request_id ", request_id)
 
+    mydir = '/home/neoh-data/logs'
+    myfile = request_id + ".log"
+    folder_path = os.path.join(mydir, myfile)
+    logging.basicConfig(filename=folder_path, level=logging.INFO)
+    logging.info('Started logging from IMERG Handler' + request_id)
+    logging.info(event)
     if "stat_type" in jsonData:
         statType = jsonData['stat_type']
     product = jsonData['product']
@@ -341,7 +347,7 @@ def imerg_handler(event):
     #     geometryJson = json.load(json_file)
     # json_file.close()
 
-    print(geometryJson)
+    # print(geometryJson)
     if "message" in geometryJson and geometryJson["message"] == "error":
         update_status( request_id, "aggregate", "failed",
                             "aggregate_imerge could not load geometry file " +
@@ -365,7 +371,7 @@ def imerg_handler(event):
     try:
         filenames = get_filenames(listing_url, start_date, end_date)
     except Exception as e:
-        print("Network error: cannot get filename list")
+        logging.info("Network error: cannot get filename list")
         update_status(request_id, "aggregate", "failed",
                             "OpenDap file list creation failed: ",
                             creation_time=creation_time_in, date_range=date_range_in, dataset=input_dataset)
@@ -455,7 +461,7 @@ def imerg_handler(event):
             # print(lon.shape)
             # print(lon)
             success = True
-            print("Successfully opened url ", url)
+            logging.info("Successfully opened url {}" .format(url))
             session.close()
 
             # variables for precip values and stats by district
@@ -475,19 +481,7 @@ def imerg_handler(event):
                 districtPolygons[dist_id] = distPolyByName[name]
 
             calcDistrictStats(districtPrecip, districtPrecipStats)
-            #    for district in districts:
-            #        # name = district['properties']['name']
-            #        dist_id = district['id']
-            #        #name = district['name']
-            #        print("district name ", name)
-            #        print("district id", dist_id)
-            #        print("mean precip ", districtPrecipStats[dist_id]['mean'])
-            #        print("median precip ", districtPrecipStats[dist_id]['median'])
-            #        print("max precip ", districtPrecipStats[dist_id]['max'])
-            #        print("min precip ", districtPrecipStats[dist_id]['min'])
-            #        print("count ", districtPrecipStats[dist_id]['count'])
 
-            #    print("finished file " + key)
 
             # reformat new json structure
             #    outputJson = {'dataValues' : []}
@@ -499,8 +493,8 @@ def imerg_handler(event):
 
             fileCnt = fileCnt + 1
         except Exception as e:
-            print("Exception ", e)
-            print("Network error opening url ", url)
+            logging.info("Exception {}" .format(e))
+            logging.info("Network error opening url " + url)
             update_status(request_id, "download", "failed",
                             "Error reading file " + url,
                             creation_time=creation_time_in, date_range=date_range_in, dataset=input_dataset)
@@ -517,7 +511,7 @@ def imerg_handler(event):
     update_status(request_id, "aggregate", "success",
                         "All requested files successfully aggregated", creation_time=creation_time_in,
                         date_range=date_range_in, dataset=input_dataset)
-    print(outputJson)
+    logging.info(outputJson)
 
 # if __name__ == '__main__':
 #    main()
