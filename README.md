@@ -17,4 +17,4 @@ Steps to use this application
 
 2. Open the terminal, execute the following command
 
-```bash build_and_upload.sh ```
+	```$ bash build_and_upload.sh ```
