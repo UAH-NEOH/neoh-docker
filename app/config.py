@@ -1,2 +1,2 @@
-Earthdata_username = 'mosquito2019'
-Earthdata_password = 'Malafr#1'
+Earthdata_username = 'XXXXXXX'
+Earthdata_password = 'XXXXXXX'
