@@ -2,9 +2,9 @@
 
 Pre-requisite sofwares
 
-	1. Docker (https://www.docker.com/)
-	2. Postman (https://www.postman.com/)
-	3. Python 3.9 
+1. Docker (https://www.docker.com/)
+2. Postman (https://www.postman.com/)
+3. Python 3.9 
 
 System requirements
 	Minimum resources allocated to Docker Desktop
