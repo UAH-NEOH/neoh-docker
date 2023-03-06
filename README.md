@@ -15,9 +15,9 @@ Steps to use this application
 
 1. Start the Docker Desktop Application
 
-2. Open the terminal, execute the following command
+2. Open the terminal, navigate to the neoh-docker directory, execute the following command in the root directory 
 
-	```$ bash build_and_upload.sh ```
+	$ bash build_and_upload.sh 
 
 ## About the files
 
