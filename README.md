@@ -13,7 +13,7 @@ System requirements
 
 Steps to use this application
 
-Note: URS login is required. (https://urs.earthdata.nasa.gov/) If you already have an account enter the username and password in the config.py file. Otherwise, Click Register on the Earthdata URS login page to get started.
+Note: Earthdata URS login is required. (https://urs.earthdata.nasa.gov/) If you already have an account enter the username and password in the config.py file. Otherwise, Click Register on the Earthdata URS login page to get started.
 
 1. Start the Docker Desktop Application
 
