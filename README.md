@@ -11,7 +11,7 @@ System requirements
 	8 GB RAM
 	100 GB HDD (Volume-storage)
 
-Steps to use this application
+## Steps to use this application
 
 Note: Earthdata URS login is required. (https://urs.earthdata.nasa.gov/) If you already have an account enter the username and password in the config.py file. Otherwise, Click Register on the Earthdata URS login page to get started.
 
