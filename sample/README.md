@@ -1,5 +1,6 @@
 ## Understanding the payload for the Docker (Query request)
 
+
 ## Variables in the payload
 These are the 13 variables supported by the Docker start-process
 
