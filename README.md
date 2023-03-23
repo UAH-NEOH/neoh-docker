@@ -13,11 +13,15 @@ System requirements
 
 Steps to use this application
 
+Note: URS login is required. (https://urs.earthdata.nasa.gov/) If you already have an account enter the username and password in the config.py file. Otherwise, Click Register on the Earthdata URS login page to get started.
+
 1. Start the Docker Desktop Application
 
 2. Open the terminal, navigate to the neoh-docker directory, execute the following command in the root directory 
 
 		bash build_and_upload.sh 
+
+Once the NEOH-Docker image is uploaded and running inside Docker Desktop Application, refer the sample payload from "sample" directory and use it with the endpoints. 
 
 ## About the files
 
@@ -25,7 +29,7 @@ The `app` directory contains the NEOH source code. The files can be modified to 
 
 The `config.py` file contains the credentials information required for this app to work. To request data from NASA servers. It first needs to be authenticated by the Earthdata 
 
-URS login (https://urs.earthdata.nasa.gov/) If you already have an account enter the username and password in the config.py file. Otherwise, Click Register on the Earthdata URS login page to get started.
+
 
 **Main.py** Python file contains the Fast API declaration. The user can find all the end-point declarations. Based on the API endpoint, handlers are called to process the user payload. The process will be passed down to `start_cloud_workflow.py`
 
