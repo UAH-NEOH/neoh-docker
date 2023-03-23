@@ -21,7 +21,9 @@ Note: Earthdata URS login is required. (https://urs.earthdata.nasa.gov/) If you 
 
 		bash build_and_upload.sh 
 
-Once the NEOH-Docker image is uploaded and running inside Docker Desktop Application, refer the sample payload from "sample" directory and use it with the endpoints. 
+Once the NEOH-Docker image is uploaded and running inside Docker Desktop Application, refer the sample payload from "sample" directory and use it with the endpoints.
+
+Refer **NEOH-Docker&WebAppguide-ReadMe.pdf** and **NEOH-Docker request guide.pdf** for more information on the workflow and request. The Files are on the root directory.
 
 ## About the files
 
